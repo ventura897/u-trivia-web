@@ -1,83 +1,80 @@
 import 'package:flutter/material.dart';
 
-import 'login_page.dart'; // I-import ang iyong login.dart file
+import 'dashboard.dart';
+import 'login_page.dart'; // Palitan ito depende sa tamang path ng login page mo
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
 
   @override
-  _SettingsScreenState createState() => _SettingsScreenState();
+  State<SettingsScreen> createState() => _SettingsScreenState();
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  int _selectedSettingIndex =
-      0; // 0: Profile, 1: Account, 2: Notification, 3: Security
+  // 0: Profile, 1: Account setting, 2: Notification, 3: Security
+  int _selectedMenuIndex = 1;
 
-  // Controllers para sa Account Setting inputs
-  final TextEditingController _fullNameController =
+  // Controllers para sa Account Settings
+  final TextEditingController _nameController =
       TextEditingController(text: 'Patrick Marquez');
-  final TextEditingController _studentIdController =
-      TextEditingController(text: '2023-01428');
-  final TextEditingController _infoController = TextEditingController(
-      text: 'CITE - Bachelor of Science in Information Technology');
+  final TextEditingController _emailController =
+      TextEditingController(text: 'example@gmail.com');
+  final TextEditingController _phoneController =
+      TextEditingController(text: '+63 912 345 6789');
+  final TextEditingController _birthdateController =
+      TextEditingController(text: 'October 15, 2005');
+  final TextEditingController _courseController = TextEditingController(
+      text: 'Bachelor of Science in Information Technology');
 
-  // Notification toggles
-  bool _emailNotif = true;
-  bool _deviceNotif = true;
-
+  // Function para sa Log Out Confirmation Dialog
   void _showLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (BuildContext dialogContext) {
+      builder: (BuildContext context) {
         return AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           title: const Text(
-            'LOG OUT',
-            textAlign: TextAlign.center,
+            'Log Out',
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
           ),
           content: const Text(
-            'Are you sure you want to log out of your account?',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.grey, fontSize: 14),
+            'Are you sure you want to log out?',
+            style: TextStyle(fontSize: 14, color: Colors.black87),
           ),
-          actionsAlignment: MainAxisAlignment.center,
           actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Isara ang dialog (No)
+              },
+              child: const Text(
+                'No',
+                style:
+                    TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+              ),
+            ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green[700],
+                backgroundColor: const Color(0xFFF97316),
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
+                  borderRadius: BorderRadius.circular(6),
+                ),
               ),
               onPressed: () {
-                // 1. Isara muna ang dialog
-                Navigator.pop(dialogContext);
-
-                // 2. Pumunta sa LoginPage at linisin ang buong route stack
+                Navigator.of(context).pop(); // Isara muna ang dialog
+                // Pumunta sa Login Page at i-clear ang buong stack para hindi na makabalik sa dashboard nang walang login
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(builder: (context) => const LoginPage()),
                   (route) => false,
                 );
               },
-              child: const Text('YES',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-            ),
-            const SizedBox(width: 12),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.deepOrange,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
+              child: const Text(
+                'Yes',
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              onPressed: () {
-                Navigator.pop(dialogContext);
-              },
-              child: const Text('NO',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
             ),
           ],
         );
@@ -87,86 +84,121 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isDesktop = screenWidth > 900;
-
     return Scaffold(
-      backgroundColor: Colors.grey[100],
       body: Row(
         children: [
-          // Left Sidebar kasama ang Log Out button sa ibaba
-          if (isDesktop)
-            Container(
-              width: 260,
-              color: Colors.white,
-              child: _buildSidebarContent(context),
-            ),
-
-          // Main Content Area
+          const Sidebar(currentIndex: 5),
           Expanded(
             child: Column(
               children: [
-                _buildHeader(context, isDesktop),
+                const TopHeader(),
                 Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(32.0),
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(24),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Header
                         const Text(
                           'Settings',
                           style: TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87),
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                        const SizedBox(height: 4),
                         const Text(
                           'Customize your preferences and manage your account.',
                           style: TextStyle(color: Colors.grey, fontSize: 13),
                         ),
                         const SizedBox(height: 24),
-                        Expanded(
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Settings Navigation Menu (Left Box)
-                              Container(
-                                width: 220,
+
+                        // Settings Content Layout
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Left Sub-navigation Menu
+                            Expanded(
+                              flex: 2,
+                              child: Container(
+                                padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.circular(12),
-                                  border:
-                                      Border.all(color: Colors.grey.shade200),
+                                  border: Border.all(
+                                    color: Colors.grey.shade200,
+                                  ),
                                 ),
                                 child: Column(
                                   children: [
-                                    _settingMenuButton(
-                                        0, Icons.person, 'Profile'),
-                                    _settingMenuButton(1, Icons.manage_accounts,
-                                        'Account setting'),
-                                    _settingMenuButton(
-                                        2, Icons.notifications, 'Notification'),
-                                    _settingMenuButton(
-                                        3, Icons.security, 'Security'),
+                                    _buildSettingsMenuItem(
+                                      Icons.person,
+                                      'Profile',
+                                      0,
+                                    ),
+                                    _buildSettingsMenuItem(
+                                      Icons.manage_accounts,
+                                      'Account setting',
+                                      1,
+                                    ),
+                                    _buildSettingsMenuItem(
+                                      Icons.notifications,
+                                      'Notification',
+                                      2,
+                                    ),
+                                    _buildSettingsMenuItem(
+                                      Icons.security,
+                                      'Security',
+                                      3,
+                                    ),
                                   ],
                                 ),
                               ),
-                              const SizedBox(width: 24),
-                              // Settings Dynamic Content (Right Box)
-                              Expanded(
-                                child: Container(
-                                  padding: const EdgeInsets.all(24),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border:
-                                        Border.all(color: Colors.grey.shade200),
+                            ),
+                            const SizedBox(width: 24),
+
+                            // Right Dynamic Content Panel
+                            Expanded(
+                              flex: 5,
+                              child: Container(
+                                padding: const EdgeInsets.all(24),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: Colors.grey.shade200,
                                   ),
-                                  child: _buildSelectedSettingContent(),
                                 ),
+                                child: _buildRightContentPanel(),
                               ),
-                            ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 40),
+
+                        // Logout Button at Bottom Right
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFF97316),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 12,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            onPressed: () => _showLogoutDialog(context),
+                            icon: const Icon(Icons.logout, size: 18),
+                            label: const Text(
+                              'LOG OUT',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
+                            ),
                           ),
                         ),
                       ],
@@ -178,265 +210,115 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ],
       ),
-      drawer: isDesktop
-          ? null
-          : Drawer(
-              child: _buildSidebarContent(context),
-            ),
     );
   }
 
-  // Sidebar Content kasama ang Log Out Button sa ibaba
-  Widget _buildSidebarContent(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Row(
-            children: const [
-              Icon(Icons.school, color: Colors.blue, size: 32),
-              SizedBox(width: 12),
-              Text(
-                'U-TRIVIA',
-                style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87),
-              ),
-            ],
-          ),
-        ),
-        const Divider(height: 1),
-        Expanded(
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              _sidebarItem(context, Icons.dashboard, 'Dashboard', false),
-              _sidebarItem(
-                  context, Icons.calendar_today, 'Daily trivia', false),
-              _sidebarItem(context, Icons.trending_up, 'My Progress', false),
-              _sidebarItem(context, Icons.leaderboard, 'Leaderboard', false),
-              _sidebarItem(context, Icons.history, 'Activity History', false),
-              _sidebarItem(context, Icons.settings, 'Settings', true),
-            ],
-          ),
-        ),
-        // Log Out Button sa ibaba ng Sidebar
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.deepOrange,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
-              ),
-              onPressed: () => _showLogoutDialog(context),
-              icon: const Icon(Icons.logout, size: 18),
-              label: const Text('LOG OUT',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _sidebarItem(
-      BuildContext context, IconData icon, String title, bool isSelected) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      decoration: BoxDecoration(
-        color: isSelected ? Colors.blue[50] : Colors.transparent,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: ListTile(
-        leading:
-            Icon(icon, color: isSelected ? Colors.blue[800] : Colors.grey[700]),
-        title: Text(
-          title,
-          style: TextStyle(
-            color: isSelected ? Colors.blue[800] : Colors.grey[800],
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          ),
-        ),
-        onTap: () {
-          if (title == 'Dashboard' ||
-              title == 'Daily trivia' ||
-              title == 'My Progress' ||
-              title == 'Leaderboard' ||
-              title == 'Activity History') {
-            Navigator.pop(context); // Bumalik sa DashboardScreen
-          }
-        },
-      ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context, bool isDesktop) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      color: Colors.white,
-      child: Row(
-        children: [
-          if (!isDesktop)
-            IconButton(
-              icon: const Icon(Icons.menu),
-              onPressed: () => Scaffold.of(context).openDrawer(),
-            ),
-          Expanded(
-            child: Container(
-              constraints: const BoxConstraints(maxWidth: 400),
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: 'Search quiz, events, or challenges ......',
-                  hintStyle: const TextStyle(color: Colors.grey, fontSize: 13),
-                  prefixIcon:
-                      const Icon(Icons.search, size: 20, color: Colors.grey),
-                  filled: true,
-                  fillColor: Colors.grey[100],
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 16),
-          const Icon(Icons.notifications_none, size: 24, color: Colors.black87),
-          const SizedBox(width: 20),
-          Row(
-            children: const [
-              CircleAvatar(
-                backgroundColor: Colors.green,
-                child: Text('P', style: TextStyle(color: Colors.white)),
-              ),
-              SizedBox(width: 8),
-              Text('Patrick Marquez',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold, color: Colors.black87)),
-              Icon(Icons.arrow_drop_down, color: Colors.black87),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _settingMenuButton(int index, IconData icon, String title) {
-    bool isSelected = _selectedSettingIndex == index;
-    return InkWell(
-      onTap: () {
-        setState(() {
-          _selectedSettingIndex = index;
-        });
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.blue[50] : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          children: [
-            Icon(icon,
-                size: 20,
-                color: isSelected ? Colors.blue[800] : Colors.grey[700]),
-            const SizedBox(width: 12),
-            Text(
-              title,
-              style: TextStyle(
-                color: isSelected ? Colors.blue[800] : Colors.grey[800],
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSelectedSettingContent() {
-    switch (_selectedSettingIndex) {
+  // Piliin ang ipapakita sa kanan batay sa piniling menu item
+  Widget _buildRightContentPanel() {
+    switch (_selectedMenuIndex) {
       case 0:
         return _buildProfileView();
       case 1:
-        return _buildAccountSettingView();
+        return _buildAccountSettingsView();
       case 2:
         return _buildNotificationView();
       case 3:
         return _buildSecurityView();
       default:
-        return Container();
+        return _buildProfileView();
     }
   }
 
+  // 1. Profile View
   Widget _buildProfileView() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Profile',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text(
+          'Profile',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+        ),
         const SizedBox(height: 20),
         Row(
           children: [
             Stack(
               children: [
                 const CircleAvatar(
-                  radius: 40,
-                  backgroundColor: Colors.green,
-                  child: Text('P',
-                      style: TextStyle(fontSize: 32, color: Colors.white)),
+                  radius: 36,
+                  backgroundColor: Color(0xFF047857),
+                  child: Text(
+                    'P',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
                 Positioned(
                   bottom: 0,
                   right: 0,
-                  child: CircleAvatar(
-                    radius: 14,
-                    backgroundColor: Colors.white,
-                    child: const Icon(Icons.camera_alt,
-                        size: 14, color: Colors.black87),
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.camera_alt,
+                      size: 14,
+                      color: Colors.black87,
+                    ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(width: 20),
+            const SizedBox(width: 16),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  children: [
-                    Text(_fullNameController.text,
-                        style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold)),
-                    const SizedBox(width: 16),
-                    Text('CITE',
-                        style: TextStyle(
-                            color: Colors.grey[700],
-                            fontWeight: FontWeight.bold)),
+                  children: const [
+                    Text(
+                      'Patrick Marquez',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    SizedBox(width: 12),
+                    Text(
+                      'CITE',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                        color: Colors.black54,
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 4),
-                const Text('example@gmail.com',
-                    style: TextStyle(color: Colors.grey)),
-                const SizedBox(height: 8),
+                const Text(
+                  'example@gmail.com',
+                  style: TextStyle(color: Colors.grey, fontSize: 13),
+                ),
+                const SizedBox(height: 6),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.blue[50],
-                    borderRadius: BorderRadius.circular(12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
                   ),
-                  child: const Text('Level 1 Beginner',
-                      style: TextStyle(
-                          color: Colors.blue,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold)),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: const Text(
+                    'Level 1 Beginner',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -445,187 +327,364 @@ class _SettingsScreenState extends State<SettingsScreen> {
         const SizedBox(height: 30),
         Row(
           children: [
-            _statCard('Total Points', '150', Icons.star, Colors.orange),
+            Expanded(
+              child: _buildInfoCard(
+                'Total Points',
+                '150',
+                Icons.star,
+                Colors.amber,
+              ),
+            ),
             const SizedBox(width: 16),
-            _statCard('Quizzes Completed', '3', Icons.book, Colors.blue),
+            Expanded(
+              child: _buildInfoCard(
+                'Quizzes Completed',
+                '3',
+                Icons.assignment,
+                Colors.blue,
+              ),
+            ),
             const SizedBox(width: 16),
-            _statCard('Campus Rank', '#11', Icons.emoji_events, Colors.amber,
-                subtitle: 'Top 5% of students'),
+            Expanded(
+              child: _buildInfoCard(
+                'Campus Rank',
+                '#11',
+                Icons.emoji_events,
+                Colors.orange,
+                sub: 'Top 5% of students',
+              ),
+            ),
           ],
         ),
       ],
     );
   }
 
-  Widget _statCard(String title, String value, IconData icon, Color color,
-      {String? subtitle}) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.grey[50],
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade200),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(title,
-                    style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                Icon(icon, color: color, size: 24),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(value,
-                style:
-                    const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-            if (subtitle != null) ...[
-              const SizedBox(height: 4),
-              Text(subtitle,
-                  style: const TextStyle(fontSize: 10, color: Colors.grey)),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAccountSettingView() {
+  // 2. Account Settings View
+  Widget _buildAccountSettingsView() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Account setting',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text(
+          'Account Setting',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+        const SizedBox(height: 6),
+        const Text(
+          'Update your personal information and account details.',
+          style: TextStyle(color: Colors.grey, fontSize: 12),
+        ),
         const SizedBox(height: 24),
-        _buildTextFieldRow('Full Name', _fullNameController),
+
+        // Change Name
+        _buildTextFieldLabel('Change Name'),
+        const SizedBox(height: 6),
+        TextField(
+          controller: _nameController,
+          decoration:
+              _inputDecoration('Enter your full name', Icons.person_outline),
+        ),
         const SizedBox(height: 16),
-        _buildTextFieldRow('Student ID', _studentIdController),
+
+        // Email & Phone Number
+        Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildTextFieldLabel('Email Address'),
+                  const SizedBox(height: 6),
+                  TextField(
+                    controller: _emailController,
+                    decoration: _inputDecoration(
+                        'Enter your email', Icons.email_outlined),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildTextFieldLabel('Phone / Number'),
+                  const SizedBox(height: 6),
+                  TextField(
+                    controller: _phoneController,
+                    decoration: _inputDecoration(
+                        'Enter mobile number', Icons.phone_outlined),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
         const SizedBox(height: 16),
-        _buildTextFieldRow('Info / Course', _infoController),
-        const SizedBox(height: 24),
+
+        // Birthdate & Course
+        Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildTextFieldLabel('Birthdate'),
+                  const SizedBox(height: 6),
+                  TextField(
+                    controller: _birthdateController,
+                    decoration: _inputDecoration(
+                        'Select birthdate', Icons.calendar_today_outlined),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildTextFieldLabel('Change Course'),
+                  const SizedBox(height: 6),
+                  TextField(
+                    controller: _courseController,
+                    decoration: _inputDecoration(
+                        'Enter your course', Icons.school_outlined),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 30),
+
+        // Save Changes Button
         Align(
-          alignment: Alignment.centerLeft,
+          alignment: Alignment.centerRight,
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue[800],
+              backgroundColor: const Color(0xFF047857),
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
             onPressed: () {
-              setState(() {});
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                    content: Text('Account details updated successfully!')),
+                    content: Text('Account settings updated successfully!')),
               );
             },
-            child: const Text('Save Changes'),
+            child: const Text(
+              'Save Changes',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildTextFieldRow(String label, TextEditingController controller) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label,
-            style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 13,
-                color: Colors.black87)),
-        const SizedBox(height: 6),
-        TextField(
-          controller: controller,
-          decoration: InputDecoration(
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-            filled: true,
-            fillColor: Colors.white,
-          ),
-        ),
-      ],
-    );
-  }
-
+  // 3. Notification View
   Widget _buildNotificationView() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Notification Preferences',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text(
+          'Notification Preferences',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
         const SizedBox(height: 20),
         SwitchListTile(
           title: const Text('Email Notification',
-              style: TextStyle(fontWeight: FontWeight.bold)),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
           subtitle: const Text('Receive update about quizzes and event.',
-              style: TextStyle(fontSize: 12)),
-          value: _emailNotif,
-          activeThumbColor: Colors.blue,
-          onChanged: (val) => setState(() => _emailNotif = val),
+              style: TextStyle(fontSize: 11, color: Colors.grey)),
+          value: true,
+          activeColor: const Color(0xFF2563EB),
+          onChanged: (val) {},
         ),
         const Divider(),
         SwitchListTile(
           title: const Text('Device Notification',
-              style: TextStyle(fontWeight: FontWeight.bold)),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
           subtitle: const Text('Receive Notification from your device.',
-              style: TextStyle(fontSize: 12)),
-          value: _deviceNotif,
-          activeThumbColor: Colors.blue,
-          onChanged: (val) => setState(() => _deviceNotif = val),
+              style: TextStyle(fontSize: 11, color: Colors.grey)),
+          value: true,
+          activeColor: const Color(0xFF2563EB),
+          onChanged: (val) {},
         ),
       ],
     );
   }
 
+  // 4. Security View
   Widget _buildSecurityView() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Change Password',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text(
+          'Change Password',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
         const SizedBox(height: 16),
-        _buildPasswordField('Current Password'),
+        _buildTextFieldLabel('Current Password'),
+        const SizedBox(height: 6),
+        const TextField(
+          obscureText: true,
+          decoration: InputDecoration(
+            hintText: 'Enter Current Password',
+            hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
+            border: OutlineInputBorder(),
+            isDense: true,
+            contentPadding: EdgeInsets.all(12),
+          ),
+        ),
         const SizedBox(height: 12),
-        _buildPasswordField('New Password'),
+        _buildTextFieldLabel('New Password'),
+        const SizedBox(height: 6),
+        const TextField(
+          obscureText: true,
+          decoration: InputDecoration(
+            hintText: 'Enter New Password',
+            hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
+            border: OutlineInputBorder(),
+            isDense: true,
+            contentPadding: EdgeInsets.all(12),
+          ),
+        ),
         const SizedBox(height: 12),
-        _buildPasswordField('Confirm New Password'),
-        const SizedBox(height: 16),
+        _buildTextFieldLabel('Confirm New Password'),
+        const SizedBox(height: 6),
+        const TextField(
+          obscureText: true,
+          decoration: InputDecoration(
+            hintText: 'Confirm New Password',
+            hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
+            border: OutlineInputBorder(),
+            isDense: true,
+            contentPadding: EdgeInsets.all(12),
+          ),
+        ),
+        const SizedBox(height: 20),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.green[700],
+            backgroundColor: const Color(0xFF047857),
             foregroundColor: Colors.white,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           ),
           onPressed: () {},
-          child: const Text('Change Password'),
+          child: const Text('Change Password',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
         ),
       ],
     );
   }
 
-  Widget _buildPasswordField(String label) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-        const SizedBox(height: 4),
-        TextField(
-          obscureText: true,
-          decoration: InputDecoration(
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+  Widget _buildTextFieldLabel(String label) {
+    return Text(
+      label,
+      style: const TextStyle(
+        fontWeight: FontWeight.bold,
+        fontSize: 12,
+        color: Colors.black87,
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration(String hint, IconData icon) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: const TextStyle(fontSize: 12, color: Colors.grey),
+      prefixIcon: Icon(icon, size: 18, color: Colors.grey),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+      isDense: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+    );
+  }
+
+  Widget _buildSettingsMenuItem(IconData icon, String title, int menuIndex) {
+    bool isSelected = _selectedMenuIndex == menuIndex;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 6),
+      decoration: BoxDecoration(
+        color: isSelected ? const Color(0xFFDBEAFE) : Colors.transparent,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: ListTile(
+        leading: Icon(
+          icon,
+          color: isSelected ? const Color(0xFF2563EB) : Colors.black87,
+          size: 20,
+        ),
+        title: Text(
+          title,
+          style: TextStyle(
+            color: isSelected ? const Color(0xFF2563EB) : Colors.black87,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            fontSize: 13,
           ),
         ),
-      ],
+        dense: true,
+        onTap: () {
+          setState(() {
+            _selectedMenuIndex = menuIndex;
+          });
+        },
+      ),
+    );
+  }
+
+  Widget _buildInfoCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color, {
+    String sub = '',
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: color, size: 22),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 11,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          ),
+          if (sub.isNotEmpty)
+            Text(sub, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+        ],
+      ),
     );
   }
 }

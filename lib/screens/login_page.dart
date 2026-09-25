@@ -1,23 +1,21 @@
 import 'package:flutter/material.dart';
 
-import 'dashboard.dart'; // I-import ang dashboard file para dumiretso doon
-import 'register_page.dart'; // I-import ang iyong register page para sa navigation
+import 'dashboard.dart';
+import 'register_page.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+  const LoginPage({super.key});
 
   @override
-  _LoginPageState createState() => _LoginPageState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
   bool isStudent = true;
   bool _obscurePassword = true;
 
-  // Key para sa Form validation
   final _formKey = GlobalKey<FormState>();
 
-  // Controllers para makuha ang mga input kung kailangan mo man
   final TextEditingController _idController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -36,7 +34,6 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       body: Stack(
         children: [
-          // 1. Background Image na may puting overlay para luminaw ang porma
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
@@ -46,17 +43,14 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
           Container(
-            color: Colors.white.withOpacity(0.5),
+            color: Colors.white.withValues(alpha: 0.5),
           ),
-
-          // 2. Main Scrollable Content
           Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 16),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Logo Container
                   Container(
                     width: 60,
                     height: 60,
@@ -84,8 +78,6 @@ class _LoginPageState extends State<LoginPage> {
                     style: TextStyle(fontSize: 12, color: Colors.black54),
                   ),
                   const SizedBox(height: 20),
-
-                  // White Card Container na may Form
                   Container(
                     width: 420,
                     padding: const EdgeInsets.all(24),
@@ -94,14 +86,14 @@ class _LoginPageState extends State<LoginPage> {
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black.withValues(alpha: 0.1),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
                       ],
                     ),
                     child: Form(
-                      key: _formKey, // I-pin ang Form key dito
+                      key: _formKey,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -124,18 +116,15 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           ),
                           const SizedBox(height: 20),
-
-                          // Log in as Label
                           const Text(
                             'Log in as',
                             style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black87),
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
                           ),
                           const SizedBox(height: 8),
-
-                          // Toggle Buttons (Student / Faculty)
                           Row(
                             children: [
                               Expanded(
@@ -195,14 +184,13 @@ class _LoginPageState extends State<LoginPage> {
                             ],
                           ),
                           const SizedBox(height: 16),
-
-                          // Conditional ID Field (Student ID or Teacher ID)
                           Text(
                             isStudent ? 'Student ID' : 'Teacher ID',
                             style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black87),
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
                           ),
                           const SizedBox(height: 6),
                           TextFormField(
@@ -228,14 +216,13 @@ class _LoginPageState extends State<LoginPage> {
                             },
                           ),
                           const SizedBox(height: 16),
-
-                          // Name Field
                           const Text(
                             'Name',
                             style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black87),
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
                           ),
                           const SizedBox(height: 6),
                           TextFormField(
@@ -257,14 +244,13 @@ class _LoginPageState extends State<LoginPage> {
                             },
                           ),
                           const SizedBox(height: 16),
-
-                          // Department / Course Dropdown
                           const Text(
                             'Department / Course',
                             style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black87),
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
                           ),
                           const SizedBox(height: 6),
                           DropdownButtonFormField<String>(
@@ -330,14 +316,13 @@ class _LoginPageState extends State<LoginPage> {
                             },
                           ),
                           const SizedBox(height: 16),
-
-                          // Password Field
                           const Text(
                             'Password',
                             style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black87),
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
                           ),
                           const SizedBox(height: 6),
                           TextFormField(
@@ -373,8 +358,6 @@ class _LoginPageState extends State<LoginPage> {
                             },
                           ),
                           const SizedBox(height: 24),
-
-                          // Log in Button na dumidiretso sa Dashboard Screen
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
@@ -387,7 +370,7 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                               onPressed: () {
                                 if (_formKey.currentState!.validate()) {
-                                  // Gamitin ang pushReplacement para hindi na pwedeng balikan ang login page gamit ang back button
+                                  // Direktang lumilipat sa DashboardScreen nang walang onNavigate error
                                   Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
@@ -397,26 +380,25 @@ class _LoginPageState extends State<LoginPage> {
                                   );
                                 }
                               },
-                              child: Row(
+                              child: const Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
-                                children: const [
+                                children: [
                                   Icon(Icons.lock,
                                       size: 16, color: Colors.white),
                                   SizedBox(width: 8),
                                   Text(
                                     'Log in',
                                     style: TextStyle(
-                                        fontSize: 15,
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold),
+                                      fontSize: 15,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
                           ),
                           const SizedBox(height: 16),
-
-                          // Divider with 'or'
                           Row(
                             children: const [
                               Expanded(child: Divider(color: Colors.grey)),
@@ -430,8 +412,6 @@ class _LoginPageState extends State<LoginPage> {
                             ],
                           ),
                           const SizedBox(height: 16),
-
-                          // Continue with Google Button
                           SizedBox(
                             width: double.infinity,
                             child: OutlinedButton(
@@ -443,41 +423,41 @@ class _LoginPageState extends State<LoginPage> {
                                     borderRadius: BorderRadius.circular(8)),
                               ),
                               onPressed: () {},
-                              child: Row(
+                              child: const Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
-                                children: const [
+                                children: [
                                   Icon(Icons.g_mobiledata,
                                       size: 28, color: Colors.blue),
                                   SizedBox(width: 8),
                                   Text(
                                     'Continue with Google',
                                     style: TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.black87,
-                                        fontWeight: FontWeight.w500),
+                                      fontSize: 14,
+                                      color: Colors.black87,
+                                      fontWeight: FontWeight.w500,
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
                           ),
                           const SizedBox(height: 16),
-
-                          // Link papunta sa Register Page kung wala pang account
                           Center(
                             child: TextButton(
                               onPressed: () {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) =>
-                                          const RegisterPage()),
+                                    builder: (context) => const RegisterPage(),
+                                  ),
                                 );
                               },
                               child: const Text(
                                 "Don't have an account? Register",
                                 style: TextStyle(
-                                    color: Color(0xFF2E7D32),
-                                    fontWeight: FontWeight.bold),
+                                  color: Color(0xFF2E7D32),
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ),

@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'login_page.dart'; // I-import ang login page para sa navigation
 
 class RegisterPage extends StatefulWidget {
-  const RegisterPage({Key? key}) : super(key: key);
+  const RegisterPage({super.key}); // Walang 'required onNavigate' dito
 
   @override
-  _RegisterPageState createState() => _RegisterPageState();
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
 class _RegisterPageState extends State<RegisterPage> {
@@ -45,7 +45,7 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
           ),
           Container(
-            color: Colors.white.withOpacity(0.5),
+            color: Colors.white.withValues(alpha: 0.5),
           ),
 
           // 2. Main Content
@@ -93,7 +93,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black.withValues(alpha: 0.1),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -128,9 +128,10 @@ class _RegisterPageState extends State<RegisterPage> {
                           const Text(
                             'Create as',
                             style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black87),
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
                           ),
                           const SizedBox(height: 8),
 
@@ -199,9 +200,10 @@ class _RegisterPageState extends State<RegisterPage> {
                           Text(
                             isStudent ? 'Student ID' : 'Teacher ID',
                             style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black87),
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
                           ),
                           const SizedBox(height: 6),
                           TextFormField(
@@ -232,9 +234,10 @@ class _RegisterPageState extends State<RegisterPage> {
                           const Text(
                             'Name',
                             style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black87),
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
                           ),
                           const SizedBox(height: 6),
                           TextFormField(
@@ -257,13 +260,14 @@ class _RegisterPageState extends State<RegisterPage> {
                           ),
                           const SizedBox(height: 16),
 
-                          // Department / Course Dropdown (Updated with full list)
+                          // Department / Course Dropdown
                           const Text(
                             'Department / Course',
                             style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black87),
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
                           ),
                           const SizedBox(height: 6),
                           DropdownButtonFormField<String>(
@@ -334,9 +338,10 @@ class _RegisterPageState extends State<RegisterPage> {
                           const Text(
                             'Create a Password',
                             style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black87),
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
                           ),
                           const SizedBox(height: 6),
                           TextFormField(
@@ -389,7 +394,6 @@ class _RegisterPageState extends State<RegisterPage> {
                               ),
                               onPressed: () {
                                 if (_formKey.currentState!.validate()) {
-                                  // Kung pumasa sa validation, magpakita ng success message at lumipat sa login page
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
                                       content: Text(
@@ -406,18 +410,19 @@ class _RegisterPageState extends State<RegisterPage> {
                                   );
                                 }
                               },
-                              child: Row(
+                              child: const Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
-                                children: const [
+                                children: [
                                   Icon(Icons.lock,
                                       size: 16, color: Colors.white),
                                   SizedBox(width: 8),
                                   Text(
                                     'Create',
                                     style: TextStyle(
-                                        fontSize: 15,
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold),
+                                      fontSize: 15,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -462,9 +467,10 @@ class _RegisterPageState extends State<RegisterPage> {
                               child: const Text(
                                 'I already have account',
                                 style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.black87,
-                                    fontWeight: FontWeight.w500),
+                                  fontSize: 14,
+                                  color: Colors.black87,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                             ),
                           ),
