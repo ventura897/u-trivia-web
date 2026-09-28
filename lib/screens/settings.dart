@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../services/auth_service.dart'; // Firebase logout / change password
+import '../services/user_service.dart'; // Firebase profile data
 import 'dashboard.dart';
 import 'login_page.dart'; // Palitan ito depende sa tamang path ng login page mo
 
@@ -15,16 +17,210 @@ class _SettingsScreenState extends State<SettingsScreen> {
   int _selectedMenuIndex = 1;
 
   // Controllers para sa Account Settings
-  final TextEditingController _nameController =
-      TextEditingController(text: 'Patrick Marquez');
-  final TextEditingController _emailController =
-      TextEditingController(text: 'example@gmail.com');
-  final TextEditingController _phoneController =
-      TextEditingController(text: '+63 912 345 6789');
-  final TextEditingController _birthdateController =
-      TextEditingController(text: 'October 15, 2005');
-  final TextEditingController _courseController = TextEditingController(
-      text: 'Bachelor of Science in Information Technology');
+  // (Napupunan ng data galing Firebase pagka-load ng screen)
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _birthdateController = TextEditingController();
+  final TextEditingController _courseController = TextEditingController();
+
+  // Controllers para sa Security (Change Password)
+  final TextEditingController _currentPasswordController =
+      TextEditingController();
+  final TextEditingController _newPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
+
+  // Firebase
+  final UserService _userService = UserService();
+  final AuthService _authService = AuthService();
+  UserProfile? _profile; // Data ng naka-login na user galing Firebase
+  bool _isLoading = true;
+  String? _loadError;
+  bool _isSaving = false;
+  bool _isChangingPassword = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    _birthdateController.dispose();
+    _courseController.dispose();
+    _currentPasswordController.dispose();
+    _newPasswordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  // Kinukuha ang bagong data mula sa Firebase tuwing bubuksan ang Settings
+  Future<void> _loadProfile() async {
+    try {
+      final profile = await _userService.loadProfile();
+      if (!mounted) return;
+      setState(() {
+        _profile = profile;
+        _nameController.text = profile.name;
+        _emailController.text = profile.email;
+        _phoneController.text = profile.phone;
+        _birthdateController.text = profile.birthdate;
+        _courseController.text = profile.course;
+        _loadError = null;
+        _isLoading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _loadError =
+            'Could not load your settings. Please check your connection and try again.';
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _retryLoad() {
+    setState(() {
+      _isLoading = true;
+      _loadError = null;
+    });
+    _loadProfile();
+  }
+
+  void _showMessage(String message, {bool isError = false}) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? Colors.red : null,
+      ),
+    );
+  }
+
+  // I-save ang Account Settings sa Firebase (users/{uid})
+  Future<void> _saveAccountSettings() async {
+    final name = _nameController.text.trim();
+    final email = _emailController.text.trim();
+    final phone = _phoneController.text.trim();
+    final birthdate = _birthdateController.text.trim();
+    final course = _courseController.text.trim();
+
+    if (name.isEmpty) {
+      _showMessage('Please enter your full name.', isError: true);
+      return;
+    }
+    if (email.isNotEmpty &&
+        !RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email)) {
+      _showMessage('Please enter a valid email address.', isError: true);
+      return;
+    }
+    if (phone.isNotEmpty &&
+        !RegExp(r'^\+?[0-9][0-9\s\-()]{6,}$').hasMatch(phone)) {
+      _showMessage('Please enter a valid phone number.', isError: true);
+      return;
+    }
+    if (course.isEmpty) {
+      _showMessage('Please enter your course.', isError: true);
+      return;
+    }
+
+    setState(() => _isSaving = true);
+    try {
+      await _userService.updateAccountInfo(
+        name: name,
+        email: email,
+        phone: phone,
+        birthdate: birthdate,
+        course: course,
+      );
+      if (!mounted) return;
+      setState(() {
+        _profile = _profile!.copyWith(
+          name: name,
+          email: email,
+          phone: phone,
+          birthdate: birthdate,
+          course: course,
+        );
+      });
+      _showMessage('Account settings updated successfully!');
+    } catch (_) {
+      _showMessage('Could not save your changes. Please try again.',
+          isError: true);
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
+  // I-save agad ang Notification switches
+  Future<void> _toggleNotification({bool? email, bool? device}) async {
+    final previous = _profile!;
+    setState(() {
+      _profile = previous.copyWith(
+        emailNotifications: email,
+        deviceNotifications: device,
+      );
+    });
+    try {
+      await _userService.updateNotificationSettings(
+          email: email, device: device);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _profile = previous); // ibalik kung hindi na-save
+      _showMessage('Could not save your notification setting.', isError: true);
+    }
+  }
+
+  // Change Password (Firebase Authentication)
+  Future<void> _changePassword() async {
+    final current = _currentPasswordController.text;
+    final newPassword = _newPasswordController.text;
+    final confirm = _confirmPasswordController.text;
+
+    if (current.isEmpty || newPassword.isEmpty || confirm.isEmpty) {
+      _showMessage('Please fill in all password fields.', isError: true);
+      return;
+    }
+    if (newPassword.length < 6) {
+      _showMessage('New password must be at least 6 characters long.',
+          isError: true);
+      return;
+    }
+    if (newPassword != confirm) {
+      _showMessage('New password and confirmation do not match.',
+          isError: true);
+      return;
+    }
+    if (newPassword == current) {
+      _showMessage('New password must be different from your current one.',
+          isError: true);
+      return;
+    }
+
+    setState(() => _isChangingPassword = true);
+    try {
+      await _authService.changePassword(
+        currentPassword: current,
+        newPassword: newPassword,
+      );
+      _currentPasswordController.clear();
+      _newPasswordController.clear();
+      _confirmPasswordController.clear();
+      _showMessage('Password changed successfully!');
+    } on AuthException catch (e) {
+      _showMessage(e.message, isError: true);
+    } catch (_) {
+      _showMessage('Could not change your password. Please try again.',
+          isError: true);
+    } finally {
+      if (mounted) setState(() => _isChangingPassword = false);
+    }
+  }
 
   // Function para sa Log Out Confirmation Dialog
   void _showLogoutDialog(BuildContext context) {
@@ -62,11 +258,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   borderRadius: BorderRadius.circular(6),
                 ),
               ),
-              onPressed: () {
+              onPressed: () async {
                 Navigator.of(context).pop(); // Isara muna ang dialog
+                // Mag-sign out muna sa Firebase
+                try {
+                  await _authService.logout();
+                } catch (_) {
+                  _showMessage('Could not log out. Please try again.',
+                      isError: true);
+                  return;
+                }
+                if (!mounted) return;
                 // Pumunta sa Login Page at i-clear ang buong stack para hindi na makabalik sa dashboard nang walang login
                 Navigator.pushAndRemoveUntil(
-                  context,
+                  this.context,
                   MaterialPageRoute(builder: (context) => const LoginPage()),
                   (route) => false,
                 );
@@ -84,6 +289,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Kung walang naka-login, ibalik sa Login page.
+    if (!_userService.isLoggedIn) return const LoginPage();
+
     return Scaffold(
       body: Row(
         children: [
@@ -215,6 +423,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   // Piliin ang ipapakita sa kanan batay sa piniling menu item
   Widget _buildRightContentPanel() {
+    if (_isLoading) {
+      return const Padding(
+        padding: EdgeInsets.all(24),
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+    if (_loadError != null || _profile == null) {
+      return Column(
+        children: [
+          Text(
+            _loadError ?? 'Could not load your settings.',
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.grey, fontSize: 13),
+          ),
+          const SizedBox(height: 12),
+          TextButton(onPressed: _retryLoad, child: const Text('Retry')),
+        ],
+      );
+    }
+
     switch (_selectedMenuIndex) {
       case 0:
         return _buildProfileView();
@@ -231,6 +459,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   // 1. Profile View
   Widget _buildProfileView() {
+    final profile = _profile!;
+    final initial =
+        profile.name.isNotEmpty ? profile.name[0].toUpperCase() : '';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -243,12 +474,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
           children: [
             Stack(
               children: [
-                const CircleAvatar(
+                CircleAvatar(
                   radius: 36,
-                  backgroundColor: Color(0xFF047857),
+                  backgroundColor: const Color(0xFF047857),
                   child: Text(
-                    'P',
-                    style: TextStyle(
+                    initial,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
@@ -278,18 +509,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  children: const [
+                  children: [
                     Text(
-                      'Patrick Marquez',
-                      style: TextStyle(
+                      profile.name,
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),
                     ),
-                    SizedBox(width: 12),
+                    const SizedBox(width: 12),
                     Text(
-                      'CITE',
-                      style: TextStyle(
+                      profile.department,
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 13,
                         color: Colors.black54,
@@ -298,9 +529,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ],
                 ),
                 const SizedBox(height: 4),
-                const Text(
-                  'example@gmail.com',
-                  style: TextStyle(color: Colors.grey, fontSize: 13),
+                Text(
+                  profile.email.isNotEmpty
+                      ? profile.email
+                      : 'No email added yet',
+                  style: const TextStyle(color: Colors.grey, fontSize: 13),
                 ),
                 const SizedBox(height: 6),
                 Container(
@@ -312,9 +545,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     color: Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: const Text(
-                    'Level 1 Beginner',
-                    style: TextStyle(
+                  child: Text(
+                    'Level ${profile.level} ${profile.levelTitle}',
+                    style: const TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
                     ),
@@ -330,7 +563,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Expanded(
               child: _buildInfoCard(
                 'Total Points',
-                '150',
+                '${profile.points}',
                 Icons.star,
                 Colors.amber,
               ),
@@ -339,7 +572,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Expanded(
               child: _buildInfoCard(
                 'Quizzes Completed',
-                '3',
+                '${profile.quizzesCompleted}',
                 Icons.assignment,
                 Colors.blue,
               ),
@@ -348,10 +581,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Expanded(
               child: _buildInfoCard(
                 'Campus Rank',
-                '#11',
+                profile.rank == null ? '#-' : '#${profile.rank}',
                 Icons.emoji_events,
                 Colors.orange,
-                sub: 'Top 5% of students',
+                sub: 'Top ${profile.topPercent ?? '-'}% of students',
               ),
             ),
           ],
@@ -470,12 +703,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                    content: Text('Account settings updated successfully!')),
-              );
-            },
+            onPressed: _isSaving ? null : _saveAccountSettings,
             child: const Text(
               'Save Changes',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
@@ -501,9 +729,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
           subtitle: const Text('Receive update about quizzes and event.',
               style: TextStyle(fontSize: 11, color: Colors.grey)),
-          value: true,
+          value: _profile!.emailNotifications,
           activeColor: const Color(0xFF2563EB),
-          onChanged: (val) {},
+          onChanged: (val) => _toggleNotification(email: val),
         ),
         const Divider(),
         SwitchListTile(
@@ -511,9 +739,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
           subtitle: const Text('Receive Notification from your device.',
               style: TextStyle(fontSize: 11, color: Colors.grey)),
-          value: true,
+          value: _profile!.deviceNotifications,
           activeColor: const Color(0xFF2563EB),
-          onChanged: (val) {},
+          onChanged: (val) => _toggleNotification(device: val),
         ),
       ],
     );
@@ -531,9 +759,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
         const SizedBox(height: 16),
         _buildTextFieldLabel('Current Password'),
         const SizedBox(height: 6),
-        const TextField(
+        TextField(
+          controller: _currentPasswordController,
           obscureText: true,
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             hintText: 'Enter Current Password',
             hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
             border: OutlineInputBorder(),
@@ -544,9 +773,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
         const SizedBox(height: 12),
         _buildTextFieldLabel('New Password'),
         const SizedBox(height: 6),
-        const TextField(
+        TextField(
+          controller: _newPasswordController,
           obscureText: true,
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             hintText: 'Enter New Password',
             hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
             border: OutlineInputBorder(),
@@ -557,9 +787,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
         const SizedBox(height: 12),
         _buildTextFieldLabel('Confirm New Password'),
         const SizedBox(height: 6),
-        const TextField(
+        TextField(
+          controller: _confirmPasswordController,
           obscureText: true,
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             hintText: 'Confirm New Password',
             hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
             border: OutlineInputBorder(),
@@ -574,7 +805,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           ),
-          onPressed: () {},
+          onPressed: _isChangingPassword ? null : _changePassword,
           child: const Text('Change Password',
               style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
         ),

@@ -1,12 +1,28 @@
 import 'package:flutter/material.dart';
 
+import '../services/user_service.dart'; // Firebase data
 import 'dashboard.dart';
+import 'login_page.dart';
 
-class LeaderboardScreen extends StatelessWidget {
+class LeaderboardScreen extends StatefulWidget {
   const LeaderboardScreen({Key? key}) : super(key: key);
 
   @override
+  State<LeaderboardScreen> createState() => _LeaderboardScreenState();
+}
+
+class _LeaderboardScreenState extends State<LeaderboardScreen> {
+  final UserService _userService = UserService();
+
+  // Live data mula sa Firebase (nag-a-update kapag may nagbago sa points/quizzes)
+  late final Stream<LeaderboardData> _leaderboardStream =
+      _userService.leaderboardStream();
+
+  @override
   Widget build(BuildContext context) {
+    // Kung walang naka-login, ibalik sa Login page.
+    if (!_userService.isLoggedIn) return const LoginPage();
+
     return Scaffold(
       body: Row(
         children: [
@@ -16,243 +32,22 @@ class LeaderboardScreen extends StatelessWidget {
               children: [
                 const TopHeader(),
                 Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Header
-                        Row(
-                          children: const [
-                            Text(
-                              'Leaderboard',
-                              style: TextStyle(
-                                fontSize: 26,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(width: 8),
-                            Text('🏆', style: TextStyle(fontSize: 24)),
-                          ],
-                        ),
-                        const Text(
-                          'Top students based on total points.',
-                          style: TextStyle(color: Colors.grey, fontSize: 13),
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Time Filters
-                        Row(
-                          children: [
-                            _buildFilterTab('All time', true),
-                            const SizedBox(width: 8),
-                            _buildFilterTab('This Month', false),
-                            const SizedBox(width: 8),
-                            _buildFilterTab('This Week', false),
-                          ],
-                        ),
-                        const SizedBox(height: 20),
-
-                        // Podium Box Container
-                        Container(
-                          padding: const EdgeInsets.all(24),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.grey.shade200),
+                  child: StreamBuilder<LeaderboardData>(
+                    stream: _leaderboardStream,
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        return const Center(
+                          child: Text(
+                            'Could not load the leaderboard. Please try again.',
+                            style: TextStyle(color: Colors.grey, fontSize: 13),
                           ),
-                          child: Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  // Rank 2
-                                  _buildPodiumColumn(
-                                    '2',
-                                    'Jose Manalo',
-                                    'Level 4',
-                                    '1,900 pts',
-                                    Colors.red.shade100,
-                                    120,
-                                  ),
-                                  const SizedBox(width: 16),
-                                  // Rank 1
-                                  _buildPodiumColumn(
-                                    '1',
-                                    'Tristan Ibarra',
-                                    'Level 5',
-                                    '2,300 pts',
-                                    Colors.amber.shade100,
-                                    150,
-                                  ),
-                                  const SizedBox(width: 16),
-                                  // Rank 3
-                                  _buildPodiumColumn(
-                                    '3',
-                                    'Rene Baterbonia',
-                                    'Level 4',
-                                    '1,590 pts',
-                                    Colors.blue.shade100,
-                                    100,
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 20),
-                              // Your Rank Banner
-                              Container(
-                                width: 400,
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFFEF08A),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Column(
-                                  children: [
-                                    const Text(
-                                      'Your Rank',
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: const [
-                                        Text(
-                                          'Patrick Marquez',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 13,
-                                          ),
-                                        ),
-                                        Text(
-                                          'Level 1',
-                                          style: TextStyle(fontSize: 12),
-                                        ),
-                                        Text(
-                                          '#11\n300 pts',
-                                          textAlign: TextAlign.right,
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-
-                        // Leaderboard Table
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.grey.shade300),
-                          ),
-                          child: Column(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.grey.shade200,
-                                  borderRadius: const BorderRadius.only(
-                                    topLeft: Radius.circular(12),
-                                    topRight: Radius.circular(12),
-                                  ),
-                                ),
-                                child: Row(
-                                  children: const [
-                                    Expanded(
-                                      flex: 1,
-                                      child: Text(
-                                        'Rank',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 13,
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 3,
-                                      child: Text(
-                                        'Student',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 13,
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 2,
-                                      child: Text(
-                                        'Level',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 13,
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 2,
-                                      child: Text(
-                                        'Points',
-                                        textAlign: TextAlign.right,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 13,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              _buildTableRow(
-                                '4',
-                                'James Harden',
-                                '3',
-                                '1,300 pts',
-                              ),
-                              _buildTableRow(
-                                '5',
-                                'Carl Jefferson',
-                                '3',
-                                '1,100 pts',
-                              ),
-                              _buildTableRow(
-                                '6',
-                                'Jojo Mara Sigan',
-                                '3',
-                                '1,050 pts',
-                              ),
-                              _buildTableRow('7', 'Top Son', '3', '1,004 pts'),
-                              _buildTableRow(
-                                '8',
-                                'Jerald Norman',
-                                '2',
-                                '999 pts',
-                              ),
-                              _buildTableRow(
-                                '9',
-                                'Coco Pementel',
-                                '2',
-                                '899 pts',
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                        );
+                      }
+                      if (!snapshot.hasData) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      return _buildContent(snapshot.data!);
+                    },
                   ),
                 ),
               ],
@@ -261,6 +56,248 @@ class LeaderboardScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Widget _buildContent(LeaderboardData data) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Row(
+            children: const [
+              Text(
+                'Leaderboard',
+                style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(width: 8),
+              Text('🏆', style: TextStyle(fontSize: 24)),
+            ],
+          ),
+          const Text(
+            'Top students based on total points.',
+            style: TextStyle(color: Colors.grey, fontSize: 13),
+          ),
+          const SizedBox(height: 16),
+
+          // Time Filters
+          Row(
+            children: [
+              _buildFilterTab('All time', true),
+              const SizedBox(width: 8),
+              _buildFilterTab('This Month', false),
+              const SizedBox(width: 8),
+              _buildFilterTab('This Week', false),
+            ],
+          ),
+          const SizedBox(height: 20),
+
+          // Podium Box Container
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey.shade200),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: _buildPodiumColumns(data.students),
+                ),
+                const SizedBox(height: 20),
+                // Your Rank Banner
+                if (data.me != null)
+                  Container(
+                    width: 400,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFEF08A),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      children: [
+                        const Text(
+                          'Your Rank',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              data.me!.name,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
+                            ),
+                            Text(
+                              'Level ${data.me!.level}',
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            Text(
+                              '#${data.me!.rank}\n${_formatPoints(data.me!.points)} pts',
+                              textAlign: TextAlign.right,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Leaderboard Table
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey.shade300),
+            ),
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(12),
+                      topRight: Radius.circular(12),
+                    ),
+                  ),
+                  child: Row(
+                    children: const [
+                      Expanded(
+                        flex: 1,
+                        child: Text(
+                          'Rank',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 3,
+                        child: Text(
+                          'Student',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          'Level',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          'Points',
+                          textAlign: TextAlign.right,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                ..._buildTableRows(data.students),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 1,900 style formatting for points
+  String _formatPoints(int points) {
+    return points.toString().replaceAllMapped(
+          RegExp(r'\B(?=(\d{3})+(?!\d))'),
+          (match) => ',',
+        );
+  }
+
+  // Podium: Rank 2 (left), Rank 1 (center), Rank 3 (right).
+  // Kung kulang pa ang users, yung mga meron lang ang ipapakita.
+  List<Widget> _buildPodiumColumns(List<LeaderboardEntry> students) {
+    if (students.isEmpty) {
+      return [
+        const Text(
+          'No students on the leaderboard yet.',
+          style: TextStyle(color: Colors.grey, fontSize: 13),
+        ),
+      ];
+    }
+
+    // [position sa listahan, kulay, taas] - parehas ng orihinal na design
+    final slots = <List<dynamic>>[
+      [1, Colors.red.shade100, 120.0],
+      [0, Colors.amber.shade100, 150.0],
+      [2, Colors.blue.shade100, 100.0],
+    ];
+
+    final widgets = <Widget>[];
+    for (final slot in slots) {
+      final index = slot[0] as int;
+      if (index >= students.length) continue;
+      final student = students[index];
+      if (widgets.isNotEmpty) widgets.add(const SizedBox(width: 16));
+      widgets.add(
+        _buildPodiumColumn(
+          '${student.rank}',
+          student.name,
+          'Level ${student.level}',
+          '${_formatPoints(student.points)} pts',
+          slot[1] as Color,
+          slot[2] as double,
+        ),
+      );
+    }
+    return widgets;
+  }
+
+  // Table: Rank 4 pababa (hanggang Top 50 lang para hindi sobrang haba)
+  List<Widget> _buildTableRows(List<LeaderboardEntry> students) {
+    return students
+        .skip(3)
+        .take(47)
+        .map((student) => _buildTableRow(
+              '${student.rank}',
+              student.name,
+              '${student.level}',
+              '${_formatPoints(student.points)} pts',
+            ))
+        .toList();
   }
 
   Widget _buildFilterTab(String title, bool isSelected) {

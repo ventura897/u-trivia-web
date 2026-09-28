@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../services/auth_service.dart'; // Firebase register logic
 import 'login_page.dart'; // I-import ang login page para sa navigation
 
 class RegisterPage extends StatefulWidget {
@@ -21,6 +22,53 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _idController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
+  // Firebase
+  final AuthService _authService = AuthService();
+  bool _isLoading = false; // Pinipigilan ang double-tap habang nagre-register
+
+  Future<void> _handleRegister() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+    try {
+      await _authService.register(
+        isStudent: isStudent,
+        idNumber: _idController.text,
+        name: _nameController.text,
+        department: selectedDepartment!,
+        password: _passwordController.text,
+      );
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Account created successfully! Please log in.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const LoginPage(),
+        ),
+      );
+    } on AuthException catch (e) {
+      _showError(e.message);
+    } catch (_) {
+      _showError('Something went wrong. Please try again.');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  void _showError(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
+    );
+  }
 
   @override
   void dispose() {
@@ -225,6 +273,10 @@ class _RegisterPageState extends State<RegisterPage> {
                                     ? 'Please enter your Student ID'
                                     : 'Please enter your Teacher ID';
                               }
+                              if (!AuthService.validIdPattern
+                                  .hasMatch(value.trim())) {
+                                return 'Use only letters, numbers, dashes or underscores';
+                              }
                               return null;
                             },
                           ),
@@ -392,24 +444,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8)),
                               ),
-                              onPressed: () {
-                                if (_formKey.currentState!.validate()) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                          'Account created successfully! Please log in.'),
-                                      backgroundColor: Colors.green,
-                                    ),
-                                  );
-
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => const LoginPage(),
-                                    ),
-                                  );
-                                }
-                              },
+                              onPressed: _isLoading ? null : _handleRegister,
                               child: const Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [

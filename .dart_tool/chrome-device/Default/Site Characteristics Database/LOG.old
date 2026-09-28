@@ -1,0 +1,9 @@
+2026/09/28-10:26:27.503 456c Reusing MANIFEST C:\Users\ibarr\AppData\Local\Temp\flutter_tools.af6595db\flutter_tools_chrome_device.36fb7c0b\Default\Site Characteristics Database/MANIFEST-000001
+2026/09/28-10:26:27.504 456c Recovering log #3
+2026/09/28-10:26:27.513 456c Level-0 table #3: started
+2026/09/28-10:26:27.534 456c Level-0 table #3: 191 bytes OK
+2026/09/28-10:26:27.534 456c Recovering log #6
+2026/09/28-10:26:27.538 456c Reusing old log C:\Users\ibarr\AppData\Local\Temp\flutter_tools.af6595db\flutter_tools_chrome_device.36fb7c0b\Default\Site Characteristics Database/000006.log 
+2026/09/28-10:26:27.543 456c Delete type=0 #3
+2026/09/28-10:26:27.543 456c Delete type=2 #4
+2026/09/28-10:26:27.543 456c Delete type=2 #6

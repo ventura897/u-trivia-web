@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../services/auth_service.dart'; // Firebase login logic
 import 'dashboard.dart';
 import 'register_page.dart';
 
@@ -20,6 +21,47 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   String? selectedDepartment;
+
+  // Firebase
+  final AuthService _authService = AuthService();
+  bool _isLoading = false; // Pinipigilan ang double-tap habang naglo-login
+
+  Future<void> _handleLogin() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+    try {
+      await _authService.login(
+        isStudent: isStudent,
+        idNumber: _idController.text,
+        name: _nameController.text,
+        department: selectedDepartment!,
+        password: _passwordController.text,
+      );
+
+      if (!mounted) return;
+      // Direktang lumilipat sa DashboardScreen nang walang onNavigate error
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const DashboardScreen(),
+        ),
+      );
+    } on AuthException catch (e) {
+      _showError(e.message);
+    } catch (_) {
+      _showError('Something went wrong. Please try again.');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  void _showError(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
+    );
+  }
 
   @override
   void dispose() {
@@ -368,18 +410,7 @@ class _LoginPageState extends State<LoginPage> {
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8)),
                               ),
-                              onPressed: () {
-                                if (_formKey.currentState!.validate()) {
-                                  // Direktang lumilipat sa DashboardScreen nang walang onNavigate error
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          const DashboardScreen(),
-                                    ),
-                                  );
-                                }
-                              },
+                              onPressed: _isLoading ? null : _handleLogin,
                               child: const Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
