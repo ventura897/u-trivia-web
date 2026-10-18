@@ -82,18 +82,6 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             'Top students based on total points.',
             style: TextStyle(color: Colors.grey, fontSize: 13),
           ),
-          const SizedBox(height: 16),
-
-          // Time Filters
-          Row(
-            children: [
-              _buildFilterTab('All time', true),
-              const SizedBox(width: 8),
-              _buildFilterTab('This Month', false),
-              const SizedBox(width: 8),
-              _buildFilterTab('This Week', false),
-            ],
-          ),
           const SizedBox(height: 20),
 
           // Podium Box Container
@@ -248,7 +236,6 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
   }
 
   // Podium: Rank 2 (left), Rank 1 (center), Rank 3 (right).
-  // Kung kulang pa ang users, yung mga meron lang ang ipapakita.
   List<Widget> _buildPodiumColumns(List<LeaderboardEntry> students) {
     if (students.isEmpty) {
       return [
@@ -259,7 +246,6 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
       ];
     }
 
-    // [position sa listahan, kulay, taas] - parehas ng orihinal na design
     final slots = <List<dynamic>>[
       [1, Colors.red.shade100, 120.0],
       [0, Colors.amber.shade100, 150.0],
@@ -286,7 +272,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     return widgets;
   }
 
-  // Table: Rank 4 pababa (hanggang Top 50 lang para hindi sobrang haba)
+  // Table: Rank 4 pababa (hanggang Top 50 lang)
   List<Widget> _buildTableRows(List<LeaderboardEntry> students) {
     return students
         .skip(3)
@@ -298,25 +284,6 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
               '${_formatPoints(student.points)} pts',
             ))
         .toList();
-  }
-
-  Widget _buildFilterTab(String title, bool isSelected) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: isSelected ? const Color(0xFFBEF264) : Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade300),
-      ),
-      child: Text(
-        title,
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 12,
-          color: isSelected ? Colors.black87 : Colors.grey.shade700,
-        ),
-      ),
-    );
   }
 
   Widget _buildPodiumColumn(

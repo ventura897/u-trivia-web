@@ -103,16 +103,14 @@ class _RegisterPageState extends State<RegisterPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Logo
-                  Container(
-                    width: 60,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      color: Colors.blue[900],
-                      shape: BoxShape.circle,
+                  // Pinalitan at ginawang pabilog ang assets/trivia.png logo dito
+                  ClipOval(
+                    child: Image.asset(
+                      'assets/trivia.png',
+                      width: 70,
+                      height: 70,
+                      fit: BoxFit.cover,
                     ),
-                    child:
-                        const Icon(Icons.school, color: Colors.white, size: 30),
                   ),
                   const SizedBox(height: 10),
                   const Text(

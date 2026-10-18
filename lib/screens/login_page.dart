@@ -22,7 +22,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
   String? selectedDepartment;
 
-  // Firebase
+// Firebase
   final AuthService _authService = AuthService();
   bool _isLoading = false; // Pinipigilan ang double-tap habang naglo-login
 
@@ -40,7 +40,7 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       if (!mounted) return;
-      // Direktang lumilipat sa DashboardScreen nang walang onNavigate error
+// Direktang lumilipat sa DashboardScreen nang walang onNavigate error
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -93,15 +93,14 @@ class _LoginPageState extends State<LoginPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    width: 60,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      color: Colors.blue[900],
-                      shape: BoxShape.circle,
+                  // Pinalitan at ginawang pabilog ang assets/trivia.png sa itaas
+                  ClipOval(
+                    child: Image.asset(
+                      'assets/trivia.png',
+                      width: 70,
+                      height: 70,
+                      fit: BoxFit.cover,
                     ),
-                    child:
-                        const Icon(Icons.school, color: Colors.white, size: 30),
                   ),
                   const SizedBox(height: 10),
                   const Text(
@@ -296,7 +295,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           const SizedBox(height: 6),
                           DropdownButtonFormField<String>(
-                            value: selectedDepartment,
+                            initialValue: selectedDepartment,
                             isExpanded: true,
                             decoration: InputDecoration(
                               hintText: 'Select your department or course',
@@ -394,7 +393,7 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                return 'Please enter your password';
+                                return 'Please enter a password';
                               }
                               return null;
                             },

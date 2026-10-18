@@ -1,3 +1,2 @@
-2026/09/28-10:26:27.420 456c Reusing MANIFEST C:\Users\ibarr\AppData\Local\Temp\flutter_tools.af6595db\flutter_tools_chrome_device.36fb7c0b\Default\Sync Data\LevelDB/MANIFEST-000001
-2026/09/28-10:26:27.423 456c Recovering log #3
-2026/09/28-10:26:27.426 456c Reusing old log C:\Users\ibarr\AppData\Local\Temp\flutter_tools.af6595db\flutter_tools_chrome_device.36fb7c0b\Default\Sync Data\LevelDB/000003.log 
+2026/10/07-18:45:00.723 b2c Creating DB C:\Users\Adrian\AppData\Local\Temp\flutter_tools.b80d9f64\flutter_tools_chrome_device.c1023331\Default\Sync Data\LevelDB since it was missing.
+2026/10/07-18:45:00.928 b2c Reusing MANIFEST C:\Users\Adrian\AppData\Local\Temp\flutter_tools.b80d9f64\flutter_tools_chrome_device.c1023331\Default\Sync Data\LevelDB/MANIFEST-000001

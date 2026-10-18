@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 
+import '../services/user_service.dart'; // Firebase data
 import 'activityhistory.dart';
 import 'dailytrivia.dart';
 import 'leaderboard.dart';
 import 'login_page.dart';
 import 'myprogress.dart';
+import 'quiz.screen.dart'; // Siguraduhing naka-import din para sa quiz
+import 'scan.dart'; // Import para sa QR Code Scanner
 import 'settings.dart';
-import '../services/user_service.dart'; // Firebase data
 
 void main() {
   runApp(const UTriviaApp());
@@ -236,7 +238,6 @@ class TopHeader extends StatefulWidget {
 }
 
 class _TopHeaderState extends State<TopHeader> {
-  // Pangalan ng naka-login na user galing Firebase
   late final Stream<String> _nameStream = UserService().userNameStream();
 
   @override
@@ -246,7 +247,6 @@ class _TopHeaderState extends State<TopHeader> {
       color: Colors.white,
       child: Row(
         children: [
-          // Search Bar
           Expanded(
             child: Container(
               height: 40,
@@ -321,7 +321,6 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   final UserService _userService = UserService();
 
-  // Live data mula sa Firebase (nag-a-update kapag may nagbago sa database)
   late final Stream<DashboardData> _dashboardStream =
       _userService.dashboardStream();
   late final Stream<List<ActivityItem>> _activitiesStream =
@@ -329,7 +328,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Kung walang naka-login, ibalik sa Login page.
     if (!_userService.isLoggedIn) return const LoginPage();
 
     return Scaffold(
@@ -373,7 +371,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Welcome Banner
           Row(
             children: [
               Text(
@@ -397,7 +394,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           // Top Stats Row
           Row(
             children: [
-              // Total Points Card
               Expanded(
                 flex: 2,
                 child: Container(
@@ -405,20 +401,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Colors.amber.shade200,
-                    ),
+                    border: Border.all(color: Colors.amber.shade200),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: const [
-                          Icon(
-                            Icons.star,
-                            color: Colors.amber,
-                            size: 24,
-                          ),
+                          Icon(Icons.star, color: Colors.amber, size: 24),
                           SizedBox(width: 8),
                           Text(
                             'Total Points',
@@ -441,87 +431,86 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                       const Text(
                         'Keep it up!',
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: Colors.grey,
-                        ),
+                        style: TextStyle(fontSize: 10, color: Colors.grey),
                       ),
                     ],
                   ),
                 ),
               ),
               const SizedBox(width: 16),
-              // Quick Play Card
+              // --- SCAN AND PLAY CARD (Naka-link na sa scan.dart) ---
               Expanded(
                 flex: 3,
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF3E8FF),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: const [
-                          Icon(
-                            Icons.flash_on,
-                            color: Colors.purple,
-                            size: 24,
-                          ),
-                          SizedBox(width: 8),
-                          Text(
-                            'Quick Play',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                              color: Colors.black87,
-                            ),
-                          ),
-                        ],
+                child: InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ScanScreen(),
                       ),
-                      const SizedBox(height: 4),
-                      const Text(
-                        'Random quiz to test your knowledge and earn points.',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.black54,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
+                    );
+                  },
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF3E8FF),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
                           children: const [
+                            Icon(Icons.flash_on,
+                                color: Colors.purple, size: 24),
+                            SizedBox(width: 8),
                             Text(
-                              'Click to play',
+                              'Scan And Play',
                               style: TextStyle(
-                                fontSize: 11,
                                 fontWeight: FontWeight.bold,
+                                fontSize: 14,
                                 color: Colors.black87,
                               ),
                             ),
-                            SizedBox(width: 4),
-                            Icon(Icons.arrow_forward,
-                                size: 14, color: Colors.black87),
                           ],
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 4),
+                        const Text(
+                          'Random quiz to test your knowledge and earn points.',
+                          style: TextStyle(fontSize: 11, color: Colors.black54),
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: const [
+                              Text(
+                                'Click to play',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              SizedBox(width: 4),
+                              Icon(Icons.arrow_forward,
+                                  size: 14, color: Colors.black87),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
               const SizedBox(width: 16),
-              // Quizzes Completed Card
               Expanded(
                 flex: 2,
                 child: Container(
@@ -529,9 +518,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Colors.blue.shade100,
-                    ),
+                    border: Border.all(color: Colors.blue.shade100),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -547,11 +534,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       const SizedBox(height: 12),
                       Row(
                         children: [
-                          const Icon(
-                            Icons.assignment,
-                            color: Colors.blue,
-                            size: 24,
-                          ),
+                          const Icon(Icons.assignment,
+                              color: Colors.blue, size: 24),
                           const SizedBox(width: 12),
                           Text(
                             '${data.quizzesCompleted}',
@@ -568,7 +552,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ),
               const SizedBox(width: 16),
-              // Campus Rank Card
               Expanded(
                 flex: 2,
                 child: Container(
@@ -582,11 +565,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     children: [
                       Row(
                         children: const [
-                          Icon(
-                            Icons.emoji_events,
-                            color: Colors.orange,
-                            size: 24,
-                          ),
+                          Icon(Icons.emoji_events,
+                              color: Colors.orange, size: 24),
                           SizedBox(width: 8),
                           Text(
                             'Campus Rank',
@@ -609,10 +589,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                       Text(
                         'Top ${data.topPercent ?? '-'}% of students',
-                        style: const TextStyle(
-                          fontSize: 9,
-                          color: Colors.black54,
-                        ),
+                        style:
+                            const TextStyle(fontSize: 9, color: Colors.black54),
                       ),
                     ],
                   ),
@@ -626,7 +604,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Left 2 Columns Grid
               Expanded(
                 flex: 3,
                 child: Column(
@@ -650,6 +627,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             'Start Quiz',
                             Icons.account_balance,
                             Colors.indigo,
+                            onTap: () => _showQuizOptionsDialog(context),
                           ),
                         ),
                       ],
@@ -682,7 +660,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ),
               const SizedBox(width: 24),
-              // Right Progress Box
               Expanded(
                 flex: 2,
                 child: Container(
@@ -690,9 +667,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Colors.grey.shade200,
-                    ),
+                    border: Border.all(color: Colors.grey.shade200),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -733,9 +708,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           Text(
                             '${data.pointsInLevel} / ${DashboardData.pointsPerLevel} PTS',
                             style: const TextStyle(
-                              fontSize: 11,
-                              color: Colors.grey,
-                            ),
+                                fontSize: 11, color: Colors.grey),
                           ),
                         ],
                       ),
@@ -756,20 +729,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         alignment: Alignment.centerRight,
                         child: Text(
                           '${(data.progress * 100).round()}%',
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: Colors.grey,
-                          ),
+                          style:
+                              const TextStyle(fontSize: 11, color: Colors.grey),
                         ),
                       ),
                       const SizedBox(height: 10),
                       const Center(
                         child: Text(
                           'Keep earning points to level up!',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.grey,
-                          ),
+                          style: TextStyle(fontSize: 11, color: Colors.grey),
                         ),
                       ),
                     ],
@@ -813,7 +781,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                _buildRecentActivities(),
+                const Text('Could not load your activities.',
+                    style: TextStyle(fontSize: 12, color: Colors.grey)),
               ],
             ),
           ),
@@ -822,139 +791,169 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildFeatureCard(
-    String title,
-    String subtitle,
-    String actionText,
-    IconData icon,
-    Color iconColor,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: iconColor, size: 24),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
-                    color: Colors.black87,
-                  ),
+  // --- Modal para sa pagpili ng Category at Difficulty ---
+  void _showQuizOptionsDialog(BuildContext context) {
+    String selectedCategory = 'University';
+    String selectedDifficulty = 'Easy';
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Configure Quiz',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+              contentPadding: const EdgeInsets.fromLTRB(20.0, 16.0, 20.0, 4.0),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Select Category:',
+                        style: TextStyle(
+                            fontWeight: FontWeight.w600, fontSize: 13)),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        ChoiceChip(
+                          label: const Text('University'),
+                          selected: selectedCategory == 'University',
+                          onSelected: (bool selected) {
+                            setState(() {
+                              selectedCategory = 'University';
+                            });
+                          },
+                        ),
+                        const SizedBox(width: 8),
+                        ChoiceChip(
+                          label: const Text('Academic'),
+                          selected: selectedCategory == 'Academic',
+                          onSelected: (bool selected) {
+                            setState(() {
+                              selectedCategory = 'Academic';
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    const Text('Select Difficulty:',
+                        style: TextStyle(
+                            fontWeight: FontWeight.w600, fontSize: 13)),
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: ['Easy', 'Medium', 'Hard'].map((level) {
+                        return ChoiceChip(
+                          label: Text(level),
+                          selected: selectedDifficulty == level,
+                          onSelected: (bool selected) {
+                            setState(() {
+                              selectedDifficulty = level;
+                            });
+                          },
+                        );
+                      }).toList(),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            subtitle,
-            style: const TextStyle(fontSize: 11, color: Colors.grey),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Text(
-                actionText,
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF2563EB),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel'),
                 ),
-              ),
-              const SizedBox(width: 4),
-              const Icon(Icons.arrow_forward,
-                  size: 14, color: Color(0xFF2563EB)),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Recent Achievements list, loaded from Firebase (users/{uid}/activities).
-  Widget _buildRecentActivities() {
-    return StreamBuilder<List<ActivityItem>>(
-      stream: _activitiesStream,
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8.0),
-            child: Text(
-              'Could not load your activities.',
-              style: TextStyle(fontSize: 13, color: Colors.grey),
-            ),
-          );
-        }
-        if (!snapshot.hasData) {
-          return const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8.0),
-            child: SizedBox(
-              width: 18,
-              height: 18,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
-          );
-        }
-
-        final activities = snapshot.data!;
-        if (activities.isEmpty) {
-          return const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8.0),
-            child: Text(
-              "You haven't answered any activity yet.",
-              style: TextStyle(fontSize: 13, color: Colors.grey),
-            ),
-          );
-        }
-
-        return Column(
-          children: activities
-              .map((a) => _buildAchievementItem(a.title, '+ ${a.points} pts'))
-              .toList(),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF1E3A8A)),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => QuizScreen(
+                          category: selectedCategory,
+                          difficulty: selectedDifficulty,
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text('Start Quiz',
+                      style: TextStyle(color: Colors.white)),
+                ),
+              ],
+            );
+          },
         );
       },
     );
   }
 
-  Widget _buildAchievementItem(String title, String points) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.military_tech, color: Colors.amber, size: 20),
-              const SizedBox(width: 10),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black87,
+  // --- Helper Widget para sa Feature Cards ---
+  Widget _buildFeatureCard(
+    String title,
+    String subtitle,
+    String actionText,
+    IconData icon,
+    Color iconColor, {
+    VoidCallback? onTap,
+  }) {
+    return InkWell(
+      onTap: onTap ?? () {},
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade200),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, color: iconColor, size: 24),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      color: Colors.black87,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-              ),
-            ],
-          ),
-          Text(
-            points,
-            style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF047857),
+              ],
             ),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              subtitle,
+              style: const TextStyle(fontSize: 11, color: Colors.grey),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Text(
+                  actionText,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: iconColor,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Icon(Icons.arrow_forward, size: 12, color: iconColor),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
