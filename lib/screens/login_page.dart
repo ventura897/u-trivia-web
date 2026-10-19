@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../services/auth_service.dart'; // Firebase login logic
 import 'dashboard.dart';
+import 'facultydashboard.dart'; // I-import ang Faculty Dashboard
 import 'register_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -40,13 +41,23 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       if (!mounted) return;
-// Direktang lumilipat sa DashboardScreen nang walang onNavigate error
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const DashboardScreen(),
-        ),
-      );
+
+      // Conditional navigation batay kung Student o Faculty ang nag-login
+      if (isStudent) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const DashboardScreen(),
+          ),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const FacultyDashboard(),
+          ),
+        );
+      }
     } on AuthException catch (e) {
       _showError(e.message);
     } catch (_) {
@@ -295,7 +306,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           const SizedBox(height: 6),
                           DropdownButtonFormField<String>(
-                            initialValue: selectedDepartment,
+                            value: selectedDepartment,
                             isExpanded: true,
                             decoration: InputDecoration(
                               hintText: 'Select your department or course',
